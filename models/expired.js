@@ -1,10 +1,15 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
 
 const expiredSchema = mongoose.Schema({
-    expired : {
-        type : Array,
-        default : [],
+    expiredTaskName : {
+        type : String,
+        trim: true,
+    },
+    expiredAt : {
+        type : Date,
+        default : moment()
     }
 },{timestamp : true});
 
-module.exports = mongoose.model('Completed', expiredSchema);
+module.exports = mongoose.model('Expired', expiredSchema);

@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const Task = require('../models/tasks');
+const schedule = require('node-schedule');
 
 //creating a function to fetch the user id 
 exports.getUserById = (req,res,next,id) => {
@@ -36,6 +37,7 @@ exports.createNewTask = (req,res) => {
                 error : "There was an error while creating the task"
             });
         }
+        //If new task is added update the tasks in User
         return User.findOneAndUpdate(
             {_id : req.profile._id},
             {$push: {tasks : tasks}},
@@ -74,8 +76,15 @@ exports.deleteTask = (req,res) => {
                 error : "Error deleting the task",
             })
         }
-        return res.json({
-            message : "deleted successfully"
+        return User.findOneAndUpdate(
+            {_id : req.profile._id},
+            {$pull: {tasks : tasks}},
+            {new : true , useFindAndModify : false}
+        ).then(function(userdet) {
+            res.json(userdet);
+        })
+        .catch(function(err){
+            res.json(err);
         })
     })
 }
