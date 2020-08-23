@@ -2,19 +2,24 @@ const express = require('express');
 const mongoose = require('mongoose');
 require ('dotenv').config();
 const app = express();
-const schedule = require('node-schedule');
+const cron = require('cron').CronJob;
 const moment = require('moment');
 const Task = require('./models/tasks');
+const {sendEmail} = require('./email');
 
 //Routes 
 const authRoutes = require('./routes/authentication');
 const taskRoutes = require('./routes/tasks');
 const userRoutes = require('./routes/user');
+const expiredRoutes = require('./routes/expired');
+
 //Middleware 
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const Expired = require('./models/expired');
+const { CronJob } = require('cron');
+const User = require('./models/user');
 
 //Using the middleware 
 app.use(bodyParser.json());
@@ -25,47 +30,44 @@ app.use(cors());
 app.use('/api',authRoutes);
 app.use('/api',taskRoutes);
 app.use('/api',userRoutes);
+app.use('/api',expiredRoutes);
 
 //Creating a scheduler to perform a function to delete users after expiry
 
-const deleteUsers = () => {
-    let current = moment().subtract(Task.expiry,'minutes');
-    current = moment().utc(current).format();
+const deleteUserTasks = () => {
     Task.find().exec((err,tasks) => {
         if(err) {
-            return res.status(400).json({
-                error : "There was an error in moving data",
-            })
+            console.log('Error Finding')
         }
         tasks.map(task => {
-            if(task.createdAt <= current){
+            if(moment().isSameOrAfter(task.expiry)){
                 const expired = new Expired({
                     expiredTaskName : task.taskName,
                     expiredAt : moment()
                 });
                 expired.save((err,expiredResult) => {
                     if(err){
-                        return res.status(400).json({
-                            error : "error updating expired",
-                        })
+                        return console.log("Error While updating");
                     }
-                    res.json(expiredResult);
-                })
+                    console.log(expiredResult);
+                });
+                    Task.deleteOne({_id : task._id}, (err) => {
+                        if(err) return console.log("Error while erasing users " + err);
+                        console.log("successfully erased data")
+                    })
+                }
+            if(moment().isSameOrBefore(task.expiry)){
+                return sendEmail;
             }
+            })
         })
-    Task.deleteMany({ createdAt: {$lte: current} }, (err) => {
-        if(err) return console.log("Error while erasing users " + err);
-        console.log("successfully erased data")
-        })
-    })
+    
 }
 
-let rule = new schedule.RecurrenceRule();
-rule.minute = schedule.Range(0,59,5); 
 
-let j = schedule.scheduleJob(rule,function(){
-    return deleteUsers();
-})
+const job = new CronJob("*/10 * * * * *",() => {deleteUserTasks()});
+job.start();
+
 
 //Connection to Database
 mongoose.connect(process.env.DATABASE, {

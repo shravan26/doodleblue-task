@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const ms = require("ms");
+const moment = require('moment');
 
 const taskSchema = mongoose.Schema(
   {
@@ -13,8 +13,8 @@ const taskSchema = mongoose.Schema(
       default: false,
     },
     expiry: {
-      type: Number,
-      default : 0
+      type: Date,
+      default : moment().add(1,'m')
     },
   },
   { timestamps: true }

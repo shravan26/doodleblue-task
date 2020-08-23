@@ -17,5 +17,4 @@ router.post('/register',[
 router.post('/signin',userSignIn);
 //Sign Out Route
 router.get('/signout',userSignOut);
-//fetching profile information
 module.exports = router;

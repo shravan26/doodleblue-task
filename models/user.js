@@ -26,12 +26,12 @@ const userSchema = mongoose.Schema({
             ref : "Task"
         }
     ],
-    expired : [
-        {
-            type : mongoose.Schema.Types.ObjectId,
-            ref : "Expired"
-        }
-    ]
+    // expired : [
+    //     {
+    //         type : mongoose.Schema.Types.ObjectId,
+    //         ref : "Expired"
+    //     }
+    // ]
 },{timestamps:true})
 
 //creating a virtual field where the encrypted password is set

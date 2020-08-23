@@ -2,6 +2,7 @@ let nodemailer = require('nodemailer');
 const cron = require('node-cron');
 let constants = require('./constant');
 
+
 var transporter = nodemailer.createTransport({
     service : "gmail",
     auth : {
@@ -14,10 +15,10 @@ const mailOptions = {
     from : "shravan2406@gmail.com",
     to : "lorddabura09@gmail.com",
     subject : "Hi",
-    html : "<h1>Hellos</h1>"
+    html : "<h1>Please Complete your Task soon/h1>"
 }
 
-transporter.sendMail(mailOptions,(err,info)=>{
+exports.sendEmail = transporter.sendMail(mailOptions,(err,info)=>{
     if(err){
         console.log(err);
     }

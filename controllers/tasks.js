@@ -43,10 +43,10 @@ exports.createNewTask = (req,res) => {
             {$push: {tasks : tasks}},
             {new : true , useFindAndModify : false}
         ).then(function(userdet) {
-            res.json(userdet);
+            return res.json(userdet);
         })
         .catch(function(err){
-            res.json(err);
+            return res.json(err);
         })
     });
 };
